@@ -25,11 +25,11 @@ defineProps({
 
 <style scoped>
 .card-score {
-    padding: 1rem;
+    padding: 16px;
     border: 1px solid #ddd;
     border-radius: 8px;
     background: #f9f9f9;
-    margin-top: 1rem;
+    margin-top: 16px;
 }
 
 .card-score__list {
@@ -38,6 +38,6 @@ defineProps({
 }
 
 .card-score__item {
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
 }
 </style>

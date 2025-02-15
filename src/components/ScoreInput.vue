@@ -20,7 +20,7 @@ defineProps({
         type: String,
         required: true,
     },
-    modelValue: [Number],
+    modelValue: Number,
     icon: {
         type: Object,
         default: null,
@@ -50,7 +50,6 @@ const updateValue = (event) => {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 8px;
 }
 
 .score-input__input-wrapper {

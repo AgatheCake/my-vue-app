@@ -2,14 +2,16 @@
     <div class="form-wrapper">
         <h2 class="form-wrapper__title">American Football</h2>
         <form class="form" @submit.prevent="getCombinations">
-            <Button
-                class="form__button"
-                label="Get Possibilities"
-                @submitForm="getCombinations"
-                :bgColor="'#ca563c'"
-                :textColor="'white'"
-                :icon="ballIcon"
-            ></Button>
+            <div class="form__button-wrapper">
+                <Button
+                    class="form__button"
+                    label="Get Possibilities"
+                    type="submit"
+                    :bgColor="'#ca563c'"
+                    :textColor="'#ffffff'"
+                    :icon="ballIcon"
+                ></Button>
+            </div>
 
             <div v-if="errorMessage" class="form__error-message">
                 <p>{{ errorMessage }}</p>
@@ -24,11 +26,8 @@
                         :icon="teamX"
                         name="score1"
                     />
-                    <div
-                        v-if="errors.errorMessage1"
-                        class="form__error-message"
-                    >
-                        <p>{{ errors.errorMessage1 }}</p>
+                    <div v-if="validScores.score1" class="form__error-message">
+                        <p>{{ validScores.score1 }}</p>
                     </div>
 
                     <ScoreCard
@@ -37,7 +36,6 @@
                         :teamName="'Team X '"
                         :score="form.score1"
                         :combinations="combinations.team1"
-                        name="score2"
                     />
                 </div>
 
@@ -48,11 +46,8 @@
                         v-model="form.score2"
                         :icon="teamY"
                     />
-                    <div
-                        v-if="errors.errorMessage2"
-                        class="form__error-message"
-                    >
-                        <p>{{ errors.errorMessage2 }}</p>
+                    <div v-if="validScores.score2" class="form__error-message">
+                        <p>{{ validScores.score2 }}</p>
                     </div>
 
                     <ScoreCard
@@ -69,7 +64,7 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue';
+import {ref, computed, watch} from 'vue';
 import axios from 'axios';
 
 import Button from '../components/Button.vue';
@@ -90,11 +85,9 @@ const form = ref({
     score2: 0,
 });
 
-const errors = ref({
-    errorMessage1: '',
-    errorMessage2: '',
-});
+const errorMessage = ref('');
 
+//listen dynamically the changes to reinitialize the array combination: and not display ScoreCard if combination is empty
 watch(
     () => ({score1: form.value.score1, score2: form.value.score2}),
     (newScores, oldScores) => {
@@ -114,30 +107,27 @@ const validateScore = (score) => {
 
 const errorPositiveNumber = 'Le score doit être un nombre entier positif.';
 
-const validateFormData = (score1, score2) => {
-    let hasError = false;
+const validScores = computed(() => {
+    const errorMessages = {
+        score1: '',
+        score2: '',
+    };
 
-    if (!validateScore(score1)) {
-        errors.value.errorMessage1 = errorPositiveNumber;
-        hasError = true;
-    } else {
-        errors.value.errorMessage1 = '';
+    if (!validateScore(form.value.score1)) {
+        errorMessages.score1 = errorPositiveNumber;
     }
 
-    if (!validateScore(score2)) {
-        errors.value.errorMessage2 = errorPositiveNumber;
-        hasError = true;
-    } else {
-        errors.value.errorMessage2 = '';
+    if (!validateScore(form.value.score2)) {
+        errorMessages.score2 = errorPositiveNumber;
     }
 
-    return hasError;
-};
+    return errorMessages;
+});
 
 const getCombinations = async () => {
-    const hasError = validateFormData(form.value.score1, form.value.score2);
+    errorMessage.value = '';
 
-    if (hasError) {
+    if (validScores.value.score1 || validScores.value.score2) {
         return;
     }
 
@@ -147,16 +137,8 @@ const getCombinations = async () => {
         );
         combinations.value = response.data;
     } catch (error) {
-        console.error(
-            'Erreur lors de la récupération des combinaisons:',
-            error,
-        );
-        if (
-            error.response.data.error ===
-            "L'API ne peut supporter un score supérieur à 55"
-        ) {
-            alert(error.response?.data?.error);
-        }
+        console.error('Error while fetch API combinations', error);
+        errorMessage.value = error.response?.data?.error || 'An error occured';
     }
 };
 </script>
@@ -194,6 +176,10 @@ const getCombinations = async () => {
     padding: 10px;
     font-size: 16px;
     cursor: pointer;
+}
+
+.form__button-wrapper {
+    margin-bottom: 20px;
 }
 
 .form__error-message {

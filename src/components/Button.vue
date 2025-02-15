@@ -25,7 +25,7 @@ defineProps({
     },
     icon: {
         type: String,
-        default: '', // Permet d'insérer du SVG via v-html
+        default: '',
     },
 });
 </script>
