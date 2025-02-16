@@ -105,7 +105,7 @@ const validateScore = (score) => {
     return regex.test(score);
 };
 
-const errorPositiveNumber = 'Le score doit être un nombre entier positif.';
+const errorPositiveNumber = 'The score must be a positive integer.';
 
 const validScores = computed(() => {
     const errorMessages = {

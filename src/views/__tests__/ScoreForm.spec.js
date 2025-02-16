@@ -1,6 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
 import axios from 'axios';
-
 import {mount, flushPromises} from '@vue/test-utils';
 
 import ScoreForm from '../ScoreForm.vue';
@@ -19,7 +18,7 @@ describe('ScoreForm.vue', () => {
         expect(wrapper.findComponent(ScoreInput).exists()).toBe(true);
     });
 
-    it('fetch datas from API', async () => {
+    it('fetch data from API', async () => {
         const wrapper = mount(ScoreForm);
 
         wrapper.vm.form.score1 = 10;
@@ -45,7 +44,6 @@ describe('ScoreForm.vue', () => {
         await flushPromises();
 
         //test 1 : check API call
-
         expect(axios.get).toHaveBeenCalledWith(
             'http://localhost:3000/combinations?team1=10&team2=9',
         );
@@ -53,7 +51,6 @@ describe('ScoreForm.vue', () => {
         expect(wrapper.vm.combinations).toEqual(mockData);
 
         // test 2 : check that ScoreCards are rendered with the API response
-
         const scoreCardTeam1 = wrapper.findAllComponents(ScoreCard).at(0);
         const scoreCardTeam2 = wrapper.findAllComponents(ScoreCard).at(1);
 
@@ -70,65 +67,36 @@ describe('ScoreForm.vue', () => {
         });
     });
 
-    it('validates form data correctly', () => {
+    it('validates form data correctly using validScores', () => {
         const wrapper = mount(ScoreForm);
 
         // Scenario 1: Valid scores
         wrapper.vm.form.score1 = 10;
         wrapper.vm.form.score2 = 15;
-
-        let hasError = wrapper.vm.validateFormData(
-            wrapper.vm.form.score1,
-            wrapper.vm.form.score2,
-        );
-
-        expect(hasError).toBe(false);
-        expect(wrapper.vm.errors.errorMessage1).toBe('');
-        expect(wrapper.vm.errors.errorMessage2).toBe('');
+        expect(wrapper.vm.validScores.score1).toBe('');
+        expect(wrapper.vm.validScores.score2).toBe('');
 
         // Scenario 2: Invalid score1 (non-integer)
         wrapper.vm.form.score1 = 'abc';
-        wrapper.vm.form.score2 = 15;
-
-        hasError = wrapper.vm.validateFormData(
-            wrapper.vm.form.score1,
-            wrapper.vm.form.score2,
+        expect(wrapper.vm.validScores.score1).toBe(
+            'The score must be a positive integer.',
         );
-
-        expect(hasError).toBe(true);
-        expect(wrapper.vm.errors.errorMessage1).toBe(
-            'Le score doit être un nombre entier positif.',
-        );
-        expect(wrapper.vm.errors.errorMessage2).toBe('');
+        expect(wrapper.vm.validScores.score2).toBe('');
 
         // Scenario 3: Invalid score2 (negative number)
         wrapper.vm.form.score1 = 10;
         wrapper.vm.form.score2 = -5;
-
-        hasError = wrapper.vm.validateFormData(
-            wrapper.vm.form.score1,
-            wrapper.vm.form.score2,
-        );
-
-        expect(hasError).toBe(true);
-        expect(wrapper.vm.errors.errorMessage1).toBe('');
-        expect(wrapper.vm.errors.errorMessage2).toBe(
-            'Le score doit être un nombre entier positif.',
+        expect(wrapper.vm.validScores.score1).toBe('');
+        expect(wrapper.vm.validScores.score2).toBe(
+            'The score must be a positive integer.',
         );
 
         // Scenario 4: Invalid score1 (empty string)
         wrapper.vm.form.score1 = '';
         wrapper.vm.form.score2 = 15;
-
-        hasError = wrapper.vm.validateFormData(
-            wrapper.vm.form.score1,
-            wrapper.vm.form.score2,
+        expect(wrapper.vm.validScores.score1).toBe(
+            'The score must be a positive integer.',
         );
-
-        expect(hasError).toBe(true);
-        expect(wrapper.vm.errors.errorMessage1).toBe(
-            'Le score doit être un nombre entier positif.',
-        );
-        expect(wrapper.vm.errors.errorMessage2).toBe('');
+        expect(wrapper.vm.validScores.score2).toBe('');
     });
 });
